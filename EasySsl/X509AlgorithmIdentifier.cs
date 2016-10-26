@@ -1,0 +1,45 @@
+﻿using Asn1;
+
+namespace EasySsl {
+    public class X509AlgorithmIdentifier {
+        
+        public X509AlgorithmIdentifier(Asn1ObjectIdentifier algorithmId) {
+            Id = algorithmId;            
+        }
+
+        public X509AlgorithmIdentifier(Asn1Sequence node) {
+            var i = 0;
+            var subnode = node.Nodes[i++];
+
+            Id = (Asn1ObjectIdentifier)subnode;
+            if (node.Nodes.Count > 1) {
+                subnode = node.Nodes[i++];
+                Parameters = subnode;
+            }
+        }
+
+        public Asn1ObjectIdentifier Id { get; set; }
+
+        public Asn1Node Parameters { get; set; }
+
+        public Asn1Node ToAsn1() {
+            return new Asn1Sequence {
+                Nodes = {
+                    Id,
+                    Parameters
+                }
+            };
+        }
+
+        public static X509AlgorithmIdentifier RsaEncryption = new X509AlgorithmIdentifier(Asn1ObjectIdentifier.RsaEncryption);
+
+        public static X509AlgorithmIdentifier Sha256Rsa = new X509AlgorithmIdentifier(Asn1ObjectIdentifier.Sha256WithRsaEncryption);
+
+        public override string ToString() {
+            if (Parameters == null || Parameters.Is(Asn1UniversalNodeType.Null)) 
+                return Id.ToString();
+            return string.Format("{0}: {1}",Id,Parameters);
+        }
+
+    }
+}
